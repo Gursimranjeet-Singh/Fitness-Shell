@@ -62,7 +62,8 @@ main() {
             1 "Log Fitness Data" \
             2 "View Fitness Data" \
             3 "Remove Exercise" \
-            4 "Exit" --stdout)
+            4 "Fitness Goals"\
+            5 "Exit" --stdout)
 
     case $choice in
       1)
@@ -78,6 +79,9 @@ main() {
         log_activity "Removed Exercise"
         ;;
       4)
+        ./fitnessgoal.sh
+        ;;  
+      5)
         log_activity "Script Exited"
         dialog --msgbox "Exiting Fitness Tracker. Goodbye!" 8 40
         exit 0

@@ -20,6 +20,7 @@ authenticate_user() {
   # Check if the entered credentials match any user in the file
   if grep -q "^$entered_username:$entered_password$" "$USER_DATA_FILE"; then
     dialog --msgbox "Authentication successful. Welcome, $entered_username!" 8 40
+    ./feature_navigate.sh
   else
     dialog --msgbox "Authentication failed. Invalid username or password." 8 40
   fi
