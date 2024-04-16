@@ -29,28 +29,45 @@ display_dashboard() {
 
 # Function to generate a basic report
 generate_report() {
-  clear
-  echo "Fitness Report"
-  echo "--------------"
+  report_text="Fitness Report\n--------------\n\n"
+  temp_file=$(mktemp) # Create a temporary file
   
   # Display exercise routines
-  echo -e "\nExercise Routines:"
-  echo "------------------"
+  report_text+="Exercise Routines:\n------------------\n"
   if [ -s "$FITNESS_LOG" ]; then
-    grep "Exercise Added" "$FITNESS_LOG" | awk -F, '{print $1, $4, "sets x", $5, "reps x", $6, "weight"}'
+    if grep -q "Exercise Added" "$FITNESS_LOG"; then
+      report_text+=$(grep "Exercise Added" "$FITNESS_LOG" | awk -F, '{sub(/ /, "-", $1); print $1, "sets x", $3, "reps x", $4, "weight"}')
+    else
+      report_text+="No exercise routines found."
+    fi
   else
-    echo "No exercise routines found."
+    report_text+="No exercise log found."
   fi
   
   # Display meal log
-  echo -e "\nMeal Log:"
-  echo "---------"
+  report_text+="\n\nMeal Log:\n---------\n"
   if [ -s "$MEAL_FILE" ]; then
-    cat "$MEAL_FILE" | column -t -s ','
+    report_text+=$(cat "$MEAL_FILE" | column -t -s ',' | tr '\n' '\n')
   else
-    echo "No meals found."
+    report_text+="No meals found."
   fi
+
+  # Write report text to temporary file
+  echo -e "$report_text" > "$temp_file"
+
+  # Display the report using dialog and delete temporary file afterward
+  dialog --title "Fitness Report" --textbox "$temp_file" 20 80
+  rm "$temp_file" # Delete the temporary file
 }
+
+
+
+
+
+
+
+
+
 
 # Function to add an exercise routine
 add_exercise() {
@@ -69,9 +86,22 @@ log_meal() {
   meal_name=$(dialog --inputbox "Enter meal name:" 8 40 --stdout)
   calories=$(dialog --inputbox "Enter calories consumed:" 8 40 --stdout)
 
+  # Ensure meal name is not empty
+  if [ -z "$meal_name" ]; then
+    dialog --msgbox "Meal name cannot be empty. Please try again." 8 40
+    return
+  fi
+
+  # Ensure calories are a positive number
+  if ! [[ $calories =~ ^[0-9]+$ ]]; then
+    dialog --msgbox "Calories must be a positive number. Please try again." 8 40
+    return
+  fi
+
   echo "$meal_time,Meal Logged,$meal_name,$calories kcal" >> "$MEAL_FILE"
   dialog --msgbox "Meal logged successfully." 8 40
 }
+
 
 # Main function
 main() {

@@ -55,7 +55,7 @@ remove_exercise() {
 
 # Main function
 main() {
-  log_activity "Script Started"
+  
 
   while true; do
     choice=$(dialog --menu "Fitness Tracking Menu" 15 40 4 \
